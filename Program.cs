@@ -20,7 +20,7 @@ var builder = Host.CreateDefaultBuilder(args)
         services.AddHostedService<ContratosProcessorWorkerQueue>();
 
         // Registro do serviço de validação de contratos (injeção por escopo)
-        services.AddScoped<IValidacaoEmprestimo, ServicoValidacaoEmprestimo>();
+        services.AddScoped<IValidacaoEmprestimo, ValidacaoEmprestimoService>();
 
         // Serviço que consome o scoped service de validação dentro de um BackgroundService
         services.AddHostedService<ValidacaoWorkerScopedService>();

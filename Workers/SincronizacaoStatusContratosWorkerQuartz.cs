@@ -1,5 +1,4 @@
 ﻿using Quartz;
-
 namespace EmprestimosWorkerService.Workers;
 
 public class SincronizacaoStatusContratosWorkerQuartz(ILogger<SincronizacaoStatusContratosWorkerQuartz> logger) : IJob
@@ -21,9 +20,7 @@ public class SincronizacaoStatusContratosWorkerQuartz(ILogger<SincronizacaoStatu
 
     private Task SincronizarStatusContratosAsync()
     {
-        // Aqui você pode incluir a lógica real de sincronização: consulta em APIs, banco de dados, etc.
-        // Por enquanto, vamos simular com um pequeno delay:
-
+        // Lógica real de sincronização: consulta em APIs, banco de dados, etc.        
         return Task.Delay(500);
     }
 }

@@ -8,7 +8,7 @@ public class WorkerCustomizadoHosted(ILogger<WorkerCustomizadoHosted> logger) : 
 
         try
         {
-            // Aqui pode entrar lógica de inicialização (ex: abrir conexões, carregar cache, etc.)
+            // Lógica de inicialização (ex: abrir conexões, carregar cache, etc.)
         }
         catch (Exception ex)
         {
@@ -25,7 +25,7 @@ public class WorkerCustomizadoHosted(ILogger<WorkerCustomizadoHosted> logger) : 
 
         try
         {
-            // Aqui pode entrar lógica de liberação de recursos (ex: fechar conexões, limpar buffers, etc.)
+            // Lógica de liberação de recursos (ex: fechar conexões, limpar buffers, etc.)
         }
         catch (Exception ex)
         {

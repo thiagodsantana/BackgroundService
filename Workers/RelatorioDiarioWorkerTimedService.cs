@@ -1,50 +1,55 @@
 ﻿namespace EmprestimosWorkerService.Workers;
 
-public class RelatorioDiarioWorkerTimedService(ILogger<RelatorioDiarioWorkerTimedService> logger) : IHostedService, IDisposable
+public class RelatorioDiarioWorkerTimedService(ILogger<RelatorioDiarioWorkerTimedService> logger) : BackgroundService
 {
-    private Timer? _timer;
-
-    public Task StartAsync(CancellationToken cancellationToken)
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Serviço de geração de relatório diário iniciado.");
+        logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Serviço iniciado.");
 
-        _timer = new Timer(ExecutarGeracaoRelatorio, null, TimeSpan.Zero, TimeSpan.FromSeconds(30)); // Intervalo de exemplo
+        // Executa imediatamente ao iniciar
+        await ExecutarGeracaoRelatorioAsync();
 
-        return Task.CompletedTask;
-    }
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
 
-    private void ExecutarGeracaoRelatorio(object? state)
-    {
         try
         {
-            logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Iniciando geração do relatório diário de empréstimos...");
-
-            GerarRelatorio();
-
-            logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Relatório diário de empréstimos gerado com sucesso às {Hora}.", DateTime.Now);
+            while (await timer.WaitForNextTickAsync(stoppingToken))
+            {
+                await ExecutarGeracaoRelatorioAsync();
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            logger.LogInformation("[RelatorioDiarioWorkerTimedService] Serviço cancelado (Stopping).");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "[RelatorioDiarioWorkerTimedService] - Erro durante a geração do relatório diário de empréstimos.");
+            logger.LogError(ex, "[RelatorioDiarioWorkerTimedService] Erro inesperado no loop de execução.");
+        }
+
+        logger.LogInformation("[RelatorioDiarioWorkerTimedService] Serviço finalizado.");
+    }
+
+    private async Task ExecutarGeracaoRelatorioAsync()
+    {
+        try
+        {
+            logger.LogInformation("[RelatorioDiarioWorkerTimedService] Iniciando geração do relatório diário...");
+
+            await Task.Run(() => GerarRelatorio());  // Simula trabalho assíncrono
+
+            logger.LogInformation("[RelatorioDiarioWorkerTimedService] Relatório gerado com sucesso às {Hora}.", DateTime.Now);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "[RelatorioDiarioWorkerTimedService] Erro durante a geração do relatório diário.");
         }
     }
 
     private void GerarRelatorio()
     {
-        // Aqui seria implementada a lógica real de geração de relatório (ex: consultas ao banco, exportação, etc.)
-        Thread.Sleep(500); // Simulação de tempo de geração
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken)
-    {
-        logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Encerrando o serviço de geração de relatório diário.");
-
-        _timer?.Change(Timeout.Infinite, 0);
-        return Task.CompletedTask;
-    }
-
-    public void Dispose()
-    {
-        _timer?.Dispose();
+        // Simulação de trabalho
+        Thread.Sleep(500);
+        // Aqui vai a lógica real de geração de relatório
     }
 }

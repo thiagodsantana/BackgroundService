@@ -2,7 +2,7 @@
 
 namespace EmprestimosWorkerService.Services;
 
-public class ServicoValidacaoEmprestimo(ILogger<ServicoValidacaoEmprestimo> logger) : IValidacaoEmprestimo
+public class ValidacaoEmprestimoService(ILogger<ValidacaoEmprestimoService> logger) : IValidacaoEmprestimo
 {
     public Task ValidarAsync(string contratoId)
     {

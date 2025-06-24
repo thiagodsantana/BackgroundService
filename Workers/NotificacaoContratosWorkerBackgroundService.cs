@@ -37,7 +37,7 @@ public class NotificacaoContratosWorkerBackgroundService(ILogger<NotificacaoCont
     {
         try
         {
-            // Simulação de envio - Aqui entraria lógica real (Ex: envio de e-mails, SMS, etc.)
+            // Simulação de envio (Ex: envio de e-mails, SMS, etc.)
             logger.LogInformation("[NotificacaoContratosWorkerBackgroundService] - Notificações enviadas com sucesso.");
 
             await Task.Delay(500, cancellationToken); // Simulação de tempo de envio
