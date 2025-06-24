@@ -13,12 +13,27 @@ var builder = Host.CreateDefaultBuilder(args)
         // Serviço baseado em Timer: Geração de relatórios diários de empréstimos
         services.AddHostedService<RelatorioDiarioWorkerTimedService>();
 
+        var channel = Channel.CreateUnbounded<string>();
+
         // Channel (fila na memória): Usado para enfileirar contratos para processamento assíncrono
-        services.AddSingleton(Channel.CreateUnbounded<string>());
+        services.AddSingleton(channel);
 
         // Serviço consumidor da fila de contratos
         services.AddHostedService<ContratosProcessorWorkerQueue>();
 
+        // Exemplo de produção de dados logo no startup
+        Task.Run(async () =>
+        {
+            var writer = channel.Writer;
+
+            await writer.WriteAsync("Contrato-001");
+            await writer.WriteAsync("Contrato-002");
+            await writer.WriteAsync("Contrato-003");
+
+            writer.Complete();  // Sinaliza que a produção acabou
+        });
+
+        
         // Registro do serviço de validação de contratos (injeção por escopo)
         services.AddScoped<IValidacaoEmprestimo, ValidacaoEmprestimoService>();
 

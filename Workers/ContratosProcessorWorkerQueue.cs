@@ -8,12 +8,6 @@ public class ContratosProcessorWorkerQueue(Channel<string> canal, ILogger<Contra
     {
         logger.LogInformation("[ContratosProcessorWorkerQueue] - Iniciando o processamento da fila de contratos...");
      
-        _ = Task.Run(async () =>
-        {
-            await canal.Writer.WriteAsync("001");
-            await canal.Writer.WriteAsync("002");
-            canal.Writer.Complete(); 
-        }, stoppingToken);
         try
         {
             await foreach (var contrato in canal.Reader.ReadAllAsync(stoppingToken))
