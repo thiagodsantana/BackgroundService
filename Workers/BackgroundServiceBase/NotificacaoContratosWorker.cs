@@ -1,6 +1,12 @@
-﻿namespace EmprestimosWorkerService.Workers;
+﻿namespace EmprestimosWorkerService.Workers.BackgroundServiceBase;
 
-public class NotificacaoContratosWorkerBackgroundService(ILogger<NotificacaoContratosWorkerBackgroundService> logger) : BackgroundService
+/*BackgroundService (Base com ExecuteAsync)
+  - Derivado diretamente de BackgroundService
+Quando usar?
+  - Para tarefas contínuas ou com polling (checagens regulares).
+ */
+
+public class NotificacaoContratosWorker(ILogger<NotificacaoContratosWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {

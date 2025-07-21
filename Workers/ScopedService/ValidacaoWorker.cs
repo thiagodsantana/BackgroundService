@@ -1,6 +1,12 @@
 ﻿using EmprestimosWorkerService.Interfaces;
 
-namespace EmprestimosWorkerService.Workers;
+namespace EmprestimosWorkerService.Workers.ScopedService;
+
+/* Scoped Background Service
+    - Dentro de um BackgroundService, você pode criar escopos manuais para injetar dependências do tipo Scoped (como um DbContext).
+Quando usar?
+    - Quando o seu serviço precisa de uma dependência que não pode ser Singleton.
+ */
 
 public class ValidacaoWorkerScopedService(IServiceProvider serviceProvider, ILogger<ValidacaoWorkerScopedService> logger) : BackgroundService
 {
@@ -17,7 +23,7 @@ public class ValidacaoWorkerScopedService(IServiceProvider serviceProvider, ILog
                 try
                 {
                     var validador = escopo.ServiceProvider.GetRequiredService<IValidacaoEmprestimo>();
-                    string contratoId = Guid.NewGuid().ToString();
+                    var contratoId = Guid.NewGuid().ToString();
 
                     logger.LogInformation("[ValidacaoWorkerScopedService] - Iniciando validação para o contrato: {ContratoId}", contratoId);
 
@@ -27,7 +33,7 @@ public class ValidacaoWorkerScopedService(IServiceProvider serviceProvider, ILog
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "[ValidacaoWorkerScopedService] - Erro durante a validação de um contrato.");
+                    logger.LogError(ex, "[ValidacaoWorkerScopedService] - Erro ao validar contrato dentro do escopo.");
                 }
 
                 await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
@@ -35,15 +41,15 @@ public class ValidacaoWorkerScopedService(IServiceProvider serviceProvider, ILog
         }
         catch (OperationCanceledException)
         {
-            logger.LogInformation("[ValidacaoWorkerScopedService] - Cancelamento solicitado. Encerrando serviço de validação por escopo.");
+            logger.LogInformation("[ValidacaoWorkerScopedService] - Cancelamento solicitado. Encerrando serviço.");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "[ValidacaoWorkerScopedService] - Erro inesperado no serviço de validação por escopo.");
+            logger.LogError(ex, "[ValidacaoWorkerScopedService] - Erro inesperado no serviço de validação.");
         }
         finally
         {
-            logger.LogInformation("[ValidacaoWorkerScopedService] - Serviço de validação de contratos finalizado.");
+            logger.LogInformation("[ValidacaoWorkerScopedService] - Serviço de validação finalizado.");
         }
     }
 }

@@ -1,27 +1,31 @@
 using EmprestimosWorkerService.Interfaces;
 using EmprestimosWorkerService.Services;
 using EmprestimosWorkerService.Workers;
+using EmprestimosWorkerService.Workers.AgendadorQuartz;
+using EmprestimosWorkerService.Workers.BackgroundServiceBase;
+using EmprestimosWorkerService.Workers.HostedBase;
+using EmprestimosWorkerService.Workers.ScopedService;
+using EmprestimosWorkerService.Workers.TimedServiceBase;
 using Quartz;
 using System.Threading.Channels;
 
 var builder = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
-        // Serviço contínuo: Responsável por enviar notificações de contratos
-        services.AddHostedService<NotificacaoContratosWorkerBackgroundService>();
+        // Serviço contínuo que monitora e envia notificações relacionadas a contratos
+        services.AddHostedService<NotificacaoContratosWorker>();
 
-        // Serviço baseado em Timer: Geração de relatórios diários de empréstimos
-        services.AddHostedService<RelatorioDiarioWorkerTimedService>();
+        // Serviço baseado em timer para geração periódica de relatórios diários de empréstimos
+        services.AddHostedService<RelatorioDiarioWorker>();
 
+        // Criação de uma fila em memória (Channel) para comunicação assíncrona e desacoplada entre produtores e consumidores
         var channel = Channel.CreateUnbounded<string>();
-
-        // Channel (fila na memória): Usado para enfileirar contratos para processamento assíncrono
         services.AddSingleton(channel);
 
-        // Serviço consumidor da fila de contratos
-        services.AddHostedService<ContratosProcessorWorkerQueue>();
+        // Serviço consumidor responsável por processar contratos provenientes da fila (Channel)
+        services.AddHostedService<ContratosProcessorWorker>();
 
-        // Exemplo de produção de dados logo no startup
+        // Simulação de produção inicial de dados na fila para testes ou inicialização
         Task.Run(async () =>
         {
             var writer = channel.Writer;
@@ -30,37 +34,38 @@ var builder = Host.CreateDefaultBuilder(args)
             await writer.WriteAsync("Contrato-002");
             await writer.WriteAsync("Contrato-003");
 
-            writer.Complete();  // Sinaliza que a produção acabou
+            writer.Complete();  // Indica que não haverá mais itens produzidos
         });
 
-        
-        // Registro do serviço de validação de contratos (injeção por escopo)
+        // Registro da implementação do serviço de validação de contratos com tempo de vida Scoped (por requisição/escopo)
         services.AddScoped<IValidacaoEmprestimo, ValidacaoEmprestimoService>();
 
-        // Serviço que consome o scoped service de validação dentro de um BackgroundService
+        // Serviço que consome o serviço de validação Scoped dentro de um BackgroundService, criando escopos manuais para injeção
         services.AddHostedService<ValidacaoWorkerScopedService>();
 
-        // Serviço customizado implementado diretamente com IHostedService
-        services.AddHostedService<WorkerCustomizadoHosted>();
+        // Serviço customizado que implementa diretamente IHostedService, para controle total do ciclo de vida
+        services.AddHostedService<CustomizadoWorker>();
 
-        // Configuração do Quartz Scheduler para tarefas agendadas
+        // Configuração do Quartz Scheduler para agendamento avançado de tarefas
         services.AddQuartz(q =>
         {
-            // Define a chave única para o Job de sincronização de status de contratos
+            // Definição de chave única para o job de sincronização de status dos contratos
             var jobKey = new JobKey("SincronizacaoStatusContratosJob");
 
-            // Registro do Job: Lógica de sincronização de status dos contratos com fontes externas
-            q.AddJob<SincronizacaoStatusContratosWorkerQuartz>(opt => opt.WithIdentity(jobKey));
+            // Registro do job que executa a lógica de sincronização com sistemas externos
+            q.AddJob<SincronizacaoStatusContratosWorker>(opt => opt.WithIdentity(jobKey));
 
-            // Configuração do Trigger: Executa o Job a cada 20 segundos (simulação)
+            // Configuração do trigger que dispara o job a cada 20 segundos, repetidamente
             q.AddTrigger(opt => opt
                 .ForJob(jobKey)
                 .WithSimpleSchedule(x => x.WithIntervalInSeconds(20).RepeatForever()));
         });
 
-        // Serviço que hospeda o Quartz no ciclo de vida da aplicação
+        // Hospeda o Quartz como um serviço gerenciado, aguardando o término dos jobs no shutdown
         services.AddQuartzHostedService(opt => opt.WaitForJobsToComplete = true);
-    });
+    })
+    // Configura o host para rodar como serviço do Windows, se implantado nessa plataforma
+    .UseWindowsService();
 
-// Inicia o Host (aplicação Worker Service)
+// Inicializa e executa o Host, mantendo o Worker Service ativo
 await builder.Build().RunAsync();

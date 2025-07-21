@@ -2,12 +2,18 @@
 
 namespace EmprestimosWorkerService.Workers;
 
-public class ContratosProcessorWorkerQueue(Channel<string> canal, ILogger<ContratosProcessorWorkerQueue> logger) : BackgroundService
+/* Queue-based Background Service
+    - Utiliza Channel<T>, filas internas ou mensageria externa para desacoplar a geração de tarefas do seu processamento.
+Quando usar?
+    - Para processar tarefas à medida que são enfileiradas, como envio de e-mails, logs ou eventos de domínio.
+ */
+
+public class ContratosProcessorWorker(Channel<string> canal, ILogger<ContratosProcessorWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("[ContratosProcessorWorkerQueue] - Iniciando o processamento da fila de contratos...");
-     
+
         try
         {
             await foreach (var contrato in canal.Reader.ReadAllAsync(stoppingToken))
@@ -40,6 +46,7 @@ public class ContratosProcessorWorkerQueue(Channel<string> canal, ILogger<Contra
 
     private async Task ProcessarContratoAsync(string contratoId, CancellationToken cancellationToken)
     {
+        // Inicia o processamento detalhado do contrato
         logger.LogInformation("[ContratosProcessorWorkerQueue] - Iniciando o processamento detalhado do contrato: {ContratoId}", contratoId);
 
         // Regras de negócio, integração com banco de dados etc.
