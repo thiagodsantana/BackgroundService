@@ -12,17 +12,17 @@ using System.Threading.Channels;
 var builder = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
-        // Serviço contínuo que monitora e envia notificações relacionadas a contratos
+        // BackgroundService - Serviço contínuo que monitora e envia notificações relacionadas a contratos
         services.AddHostedService<NotificacaoContratosWorker>();
 
-        // Serviço baseado em timer para geração periódica de relatórios diários de empréstimos
+        // TimedService - Serviço baseado em timer para geração periódica de relatórios diários de empréstimos
         services.AddHostedService<RelatorioDiarioWorker>();
 
         // Criação de uma fila em memória (Channel) para comunicação assíncrona e desacoplada entre produtores e consumidores
         var channel = Channel.CreateUnbounded<string>();
         services.AddSingleton(channel);
 
-        // Serviço consumidor responsável por processar contratos provenientes da fila (Channel)
+        // QueueBasedBackgroundService - Serviço consumidor responsável por processar contratos provenientes da fila (Channel)
         services.AddHostedService<ContratosProcessorWorker>();
 
         // Simulação de produção inicial de dados na fila para testes ou inicialização
@@ -40,13 +40,13 @@ var builder = Host.CreateDefaultBuilder(args)
         // Registro da implementação do serviço de validação de contratos com tempo de vida Scoped (por requisição/escopo)
         services.AddScoped<IValidacaoEmprestimo, ValidacaoEmprestimoService>();
 
-        // Serviço que consome o serviço de validação Scoped dentro de um BackgroundService, criando escopos manuais para injeção
+        // ScopedService - Serviço que consome o serviço de validação Scoped dentro de um BackgroundService, criando escopos manuais para injeção
         services.AddHostedService<ValidacaoWorkerScopedService>();
 
-        // Serviço customizado que implementa diretamente IHostedService, para controle total do ciclo de vida
+        // HostedBase - Serviço customizado que implementa diretamente IHostedService, para controle total do ciclo de vida
         services.AddHostedService<CustomizadoWorker>();
 
-        // Configuração do Quartz Scheduler para agendamento avançado de tarefas
+        // AgendadorQuartz - Configuração do Quartz Scheduler para agendamento avançado de tarefas
         services.AddQuartz(q =>
         {
             // Definição de chave única para o job de sincronização de status dos contratos
@@ -67,5 +67,5 @@ var builder = Host.CreateDefaultBuilder(args)
     // Configura o host para rodar como serviço do Windows, se implantado nessa plataforma
     .UseWindowsService();
 
-// Inicializa e executa o Host, mantendo o Worker Service ativo
+// Inicializa e executa o Host
 await builder.Build().RunAsync();
