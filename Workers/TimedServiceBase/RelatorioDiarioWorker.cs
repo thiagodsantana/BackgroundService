@@ -1,7 +1,7 @@
 ﻿namespace EmprestimosWorkerService.Workers.TimedServiceBase;
 
 /*Timed Background Service
- - Um serviço que executa em intervalos fixos usando System.Threading.Timer.
+ - Um serviço que executa em intervalos fixos usando PeriodicTimer.
 Quando usar?
  - Para executar ações com base em tempo fixo — ex: verificar novos dados a cada 10 minutos.
  */

@@ -11,7 +11,6 @@ public class NotificacaoContratosWorker(ILogger<NotificacaoContratosWorker> logg
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("[NotificacaoContratosWorkerBackgroundService] - Serviço de Notificação de Contratos iniciado.");
-
         try
         {
             while (!stoppingToken.IsCancellationRequested)
@@ -21,8 +20,6 @@ public class NotificacaoContratosWorker(ILogger<NotificacaoContratosWorker> logg
                 await EnviarNotificacoesAsync(stoppingToken);
 
                 logger.LogInformation("[NotificacaoContratosWorkerBackgroundService] - Ciclo de envio de notificações concluído. Aguardando próximo ciclo...");
-
-                await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
             }
         }
         catch (OperationCanceledException)

@@ -13,10 +13,10 @@ public class ValidacaoWorkerScopedService(IServiceProvider serviceProvider, ILog
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation("[ValidacaoWorkerScopedService] - Iniciando serviço de validação de contratos por escopo.");
-
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(15));
         try
         {
-            while (!stoppingToken.IsCancellationRequested)
+            while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
             {
                 using var escopo = serviceProvider.CreateScope();
 
@@ -34,9 +34,7 @@ public class ValidacaoWorkerScopedService(IServiceProvider serviceProvider, ILog
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "[ValidacaoWorkerScopedService] - Erro ao validar contrato dentro do escopo.");
-                }
-
-                await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
+                }            
             }
         }
         catch (OperationCanceledException)
