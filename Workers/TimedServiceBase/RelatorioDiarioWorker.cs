@@ -15,7 +15,7 @@ public class RelatorioDiarioWorker(ILogger<RelatorioDiarioWorker> logger) : Back
         // Executa imediatamente ao iniciar
         await ExecutarGeracaoRelatorioAsync();
 
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(60));
 
         try
         {

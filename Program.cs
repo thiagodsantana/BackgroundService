@@ -13,10 +13,10 @@ var builder = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         // BackgroundService - Serviço contínuo que monitora e envia notificações relacionadas a contratos
-        services.AddHostedService<NotificacaoContratosWorker>();
+        //services.AddHostedService<NotificacaoContratosWorker>();
 
         // TimedService - Serviço baseado em timer para geração periódica de relatórios diários de empréstimos
-        services.AddHostedService<RelatorioDiarioWorker>();
+        //services.AddHostedService<RelatorioDiarioWorker>();
 
         // Criação de uma fila em memória (Channel) para comunicação assíncrona e desacoplada entre produtores e consumidores
         var channel = Channel.CreateUnbounded<string>();
@@ -38,31 +38,31 @@ var builder = Host.CreateDefaultBuilder(args)
         });
 
         // Registro da implementação do serviço de validação de contratos com tempo de vida Scoped (por requisição/escopo)
-        services.AddScoped<IValidacaoEmprestimo, ValidacaoEmprestimoService>();
+        //services.AddScoped<IValidacaoEmprestimo, ValidacaoEmprestimoService>();
 
         // ScopedService - Serviço que consome o serviço de validação Scoped dentro de um BackgroundService, criando escopos manuais para injeção
-        services.AddHostedService<ValidacaoWorkerScopedService>();
+        //services.AddHostedService<ValidacaoWorkerScopedService>();
 
         // HostedBase - Serviço customizado que implementa diretamente IHostedService, para controle total do ciclo de vida
-        services.AddHostedService<CustomizadoWorker>();
+        //services.AddHostedService<CustomizadoWorker>();
 
         // AgendadorQuartz - Configuração do Quartz Scheduler para agendamento avançado de tarefas
-        services.AddQuartz(q =>
-        {
-            // Definição de chave única para o job de sincronização de status dos contratos
-            var jobKey = new JobKey("SincronizacaoStatusContratosJob");
+        //services.AddQuartz(q =>
+        //{
+        //    // Definição de chave única para o job de sincronização de status dos contratos
+        //    var jobKey = new JobKey("SincronizacaoStatusContratosJob");
 
-            // Registro do job que executa a lógica de sincronização com sistemas externos
-            q.AddJob<SincronizacaoStatusContratosWorker>(opt => opt.WithIdentity(jobKey));
+        //    // Registro do job que executa a lógica de sincronização com sistemas externos
+        //    q.AddJob<SincronizacaoStatusContratosWorker>(opt => opt.WithIdentity(jobKey));
 
-            // Configuração do trigger que dispara o job a cada 20 segundos, repetidamente
-            q.AddTrigger(opt => opt
-                .ForJob(jobKey)
-                .WithSimpleSchedule(x => x.WithIntervalInSeconds(20).RepeatForever()));
-        });
+        //    // Configuração do trigger que dispara o job a cada 20 segundos, repetidamente
+        //    q.AddTrigger(opt => opt
+        //        .ForJob(jobKey)
+        //        .WithSimpleSchedule(x => x.WithIntervalInSeconds(20).RepeatForever()));
+        //});
 
-        // Hospeda o Quartz como um serviço gerenciado, aguardando o término dos jobs no shutdown
-        services.AddQuartzHostedService(opt => opt.WaitForJobsToComplete = true);
+        //// Hospeda o Quartz como um serviço gerenciado, aguardando o término dos jobs no shutdown
+        //services.AddQuartzHostedService(opt => opt.WaitForJobsToComplete = true);
     })
     // Configura o host para rodar como serviço do Windows, se implantado nessa plataforma
     .UseWindowsService();
