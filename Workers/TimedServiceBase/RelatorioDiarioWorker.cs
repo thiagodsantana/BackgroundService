@@ -10,12 +10,15 @@ public class RelatorioDiarioWorker(ILogger<RelatorioDiarioWorker> logger) : Back
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        logger.LogCritical("====== RelatorioDiarioWorkerTimedService ======");
+        logger.LogInformation("");
+
         logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Serviço iniciado.");
 
         // Executa imediatamente ao iniciar
         await ExecutarGeracaoRelatorioAsync();
 
-        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(60));
+        using var timer = new PeriodicTimer(TimeSpan.FromSeconds(30));
 
         try
         {

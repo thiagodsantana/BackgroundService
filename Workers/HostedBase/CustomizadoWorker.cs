@@ -9,14 +9,16 @@
 
 public class CustomizadoWorker(ILogger<CustomizadoWorker> logger) : IHostedService, IAsyncDisposable
 {
-    private readonly ILogger<CustomizadoWorker> _logger = logger;
     private CancellationTokenSource? _cts;
     private Task? _executando;
     private bool _disposed = false;
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("[WorkerCustomizadoHosted] - Serviço customizado iniciado às {Hora}.", DateTime.Now);
+        logger.LogCritical("====== WorkerCustomizadoHosted ======");
+        logger.LogInformation("");
+
+        logger.LogInformation("[WorkerCustomizadoHosted] - Serviço customizado iniciado às {Hora}.", DateTime.Now);
 
         _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         _executando = ExecutarAsync(_cts.Token);
@@ -26,8 +28,7 @@ public class CustomizadoWorker(ILogger<CustomizadoWorker> logger) : IHostedServi
 
     public async Task StopAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("[WorkerCustomizadoHosted] - Serviço customizado sendo finalizado às {Hora}.", DateTime.Now);
-
+        logger.LogInformation("[WorkerCustomizadoHosted] - Serviço customizado sendo finalizado às {Hora}.", DateTime.Now);
         if (_cts != null)
         {
             _cts.Cancel();
@@ -48,29 +49,29 @@ public class CustomizadoWorker(ILogger<CustomizadoWorker> logger) : IHostedServi
 
     private async Task ExecutarAsync(CancellationToken cancellationToken)
     {
-        _logger.LogInformation("[WorkerCustomizadoHosted] - Loop de execução iniciado.");
+        logger.LogInformation("[WorkerCustomizadoHosted] - Loop de execução iniciado.");
 
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
                 // Simule uma tarefa recorrente
-                _logger.LogInformation("[WorkerCustomizadoHosted] - Executando tarefa em {Hora}.", DateTime.Now);
+                logger.LogInformation("[WorkerCustomizadoHosted] - Executando tarefa em {Hora}.", DateTime.Now);
 
                 await Task.Delay(2000, cancellationToken); // Espera 2s entre execuções
             }
             catch (OperationCanceledException)
             {
-                _logger.LogInformation("[WorkerCustomizadoHosted] - Execução cancelada.");
+                logger.LogInformation("[WorkerCustomizadoHosted] - Execução cancelada.");
                 break;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "[WorkerCustomizadoHosted] - Erro durante execução da tarefa.");
+                logger.LogError(ex, "[WorkerCustomizadoHosted] - Erro durante execução da tarefa.");
             }
         }
 
-        _logger.LogInformation("[WorkerCustomizadoHosted] - Loop de execução finalizado.");
+        logger.LogInformation("[WorkerCustomizadoHosted] - Loop de execução finalizado.");
     }
 
     public async ValueTask DisposeAsync()
@@ -78,7 +79,7 @@ public class CustomizadoWorker(ILogger<CustomizadoWorker> logger) : IHostedServi
         if (_disposed)
             return;
 
-        _logger.LogInformation("[WorkerCustomizadoHosted] - Liberando recursos assíncronos...");
+        logger.LogInformation("[WorkerCustomizadoHosted] - Liberando recursos assíncronos...");
 
         try
         {
@@ -89,7 +90,7 @@ public class CustomizadoWorker(ILogger<CustomizadoWorker> logger) : IHostedServi
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "[WorkerCustomizadoHosted] - Erro ao liberar recursos assíncronos.");
+            logger.LogError(ex, "[WorkerCustomizadoHosted] - Erro ao liberar recursos assíncronos.");
         }
 
         _disposed = true;

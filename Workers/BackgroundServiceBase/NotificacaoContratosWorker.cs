@@ -10,29 +10,32 @@ public class NotificacaoContratosWorker(ILogger<NotificacaoContratosWorker> logg
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("[NotificacaoContratosWorkerBackgroundService] - Serviço de Notificação de Contratos iniciado.");
+        logger.LogCritical("====== NotificacaoContratosWorker ======");
+        logger.LogInformation("");
+        
+        logger.LogInformation("[NotificacaoContratosWorker] - Serviço de Notificação de Contratos iniciado.");
         try
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                logger.LogInformation("[NotificacaoContratosWorkerBackgroundService] - Iniciando envio de notificações de contratos...");
+                logger.LogInformation("[NotificacaoContratos] - Iniciando envio de notificações de contratos...");
 
                 await EnviarNotificacoesAsync(stoppingToken);
 
-                logger.LogInformation("[NotificacaoContratosWorkerBackgroundService] - Ciclo de envio de notificações concluído. Aguardando próximo ciclo...");
+                logger.LogInformation("[NotificacaoContratos] - Ciclo de envio de notificações concluído. Aguardando próximo ciclo...");
             }
         }
         catch (OperationCanceledException)
         {
-            logger.LogInformation("[NotificacaoContratosWorkerBackgroundService] - Cancelamento solicitado. Encerrando o serviço de notificações.");
+            logger.LogInformation("[NotificacaoContratosWorker] - Cancelamento solicitado. Encerrando o serviço de notificações.");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "[NotificacaoContratosWorkerBackgroundService] - Erro inesperado durante o envio de notificações de contratos.");
+            logger.LogError(ex, "[NotificacaoContratosWorker] - Erro inesperado durante o envio de notificações de contratos.");
         }
         finally
         {
-            logger.LogInformation("[NotificacaoContratosWorkerBackgroundService] - Serviço de Notificação de Contratos finalizado.");
+            logger.LogInformation("[NotificacaoContratosWorker] - Serviço de Notificação de Contratos finalizado.");
         }
     }
 
@@ -41,13 +44,13 @@ public class NotificacaoContratosWorker(ILogger<NotificacaoContratosWorker> logg
         try
         {
             // Simulação de envio (Ex: envio de e-mails, SMS, etc.)
-            logger.LogInformation("[NotificacaoContratosWorkerBackgroundService] - Notificações enviadas com sucesso.");
+            logger.LogInformation("[NotificacaoContratosWorker] - Notificações enviadas com sucesso.");
 
             await Task.Delay(5000, cancellationToken); // Simulação de tempo de envio
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "[NotificacaoContratosWorkerBackgroundService] - Falha ao tentar enviar as notificações. Tentará novamente no próximo ciclo.");
+            logger.LogWarning(ex, "[NotificacaoContratosWorker] - Falha ao tentar enviar as notificações. Tentará novamente no próximo ciclo.");
         }
     }
 }

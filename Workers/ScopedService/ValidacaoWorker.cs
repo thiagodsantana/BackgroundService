@@ -8,10 +8,12 @@ Quando usar?
     - Quando o seu serviço precisa de uma dependência que não pode ser Singleton.
  */
 
-public class ValidacaoWorkerScopedService(IServiceProvider serviceProvider, ILogger<ValidacaoWorkerScopedService> logger) : BackgroundService
+public class ValidacaoWorker(IServiceProvider serviceProvider, IValidacaoEmprestimoSingleton validacaoEmprestimoSingleton, ILogger<ValidacaoWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        logger.LogCritical("====== ValidacaoWorkerScopedService ======");
+        logger.LogInformation("");
         logger.LogInformation("[ValidacaoWorkerScopedService] - Iniciando serviço de validação de contratos por escopo.");
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(15));
         try
@@ -19,11 +21,20 @@ public class ValidacaoWorkerScopedService(IServiceProvider serviceProvider, ILog
             while (!stoppingToken.IsCancellationRequested && await timer.WaitForNextTickAsync(stoppingToken))
             {
                 using var escopo = serviceProvider.CreateScope();
-
                 try
                 {
+                    string contratoId = string.Empty;
+                    contratoId = Guid.NewGuid().ToString();
+
+                    logger.LogInformation("[ValidacaoWorkerSingletonService] - Iniciando validação para o contrato Singleton: {ContratoId}", contratoId);
+
+                    await validacaoEmprestimoSingleton.ValidarAsync(contratoId);
+
+                    logger.LogInformation("[ValidacaoWorkerSingletonService] - Validação concluída para o contrato: {ContratoId}", contratoId);
+
+
                     var validador = escopo.ServiceProvider.GetRequiredService<IValidacaoEmprestimo>();
-                    var contratoId = Guid.NewGuid().ToString();
+                    contratoId = Guid.NewGuid().ToString();
 
                     logger.LogInformation("[ValidacaoWorkerScopedService] - Iniciando validação para o contrato: {ContratoId}", contratoId);
 
@@ -47,7 +58,7 @@ public class ValidacaoWorkerScopedService(IServiceProvider serviceProvider, ILog
         }
         finally
         {
-            logger.LogInformation("[ValidacaoWorkerScopedService] - Serviço de validação finalizado.");
+            logger.LogInformation("[ValidacaoWorkerScopedService] - Serviço de validação finalizado.");            
         }
     }
 }

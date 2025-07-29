@@ -1,17 +1,11 @@
 ﻿using Quartz;
-
 namespace EmprestimosWorkerService.Workers.AgendadorQuartz;
-
-/*Serviços com agendamento
- - Frameworks como Quartz.NET, Hangfire, ou Coravel oferecem recursos robustos para tarefas agendadas e cron jobs.
-Quando usar?
-    - Quando você precisa de controle fino, agendamentos complexos, ou persistência dos jobs.
- */
-
 public class SincronizacaoStatusContratosWorker(ILogger<SincronizacaoStatusContratosWorker> logger) : IJob
 {
     public async Task Execute(IJobExecutionContext context)
     {
+        logger.LogCritical("====== SincronizacaoStatusContratosWorkerQuartz ======");
+        logger.LogInformation("");
         logger.LogInformation("[SincronizacaoStatusContratosWorkerQuartz] - Iniciando job de sincronização de status de contratos às {Hora}.", DateTime.Now);
 
         try
@@ -28,7 +22,6 @@ public class SincronizacaoStatusContratosWorker(ILogger<SincronizacaoStatusContr
 
     private static async Task SincronizarStatusContratosAsync()
     {
-        // Lógica real de sincronização: consulta em APIs, banco de dados, etc.        
         await Task.Delay(500); // Simula tempo de execução
     }
 }

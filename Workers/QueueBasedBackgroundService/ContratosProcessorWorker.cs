@@ -1,6 +1,6 @@
 ﻿using System.Threading.Channels;
 
-namespace EmprestimosWorkerService.Workers;
+namespace EmprestimosWorkerService.Workers.QueueBasedBackgroundService;
 
 /* Queue-based Background Service
     - Utiliza Channel<T>, filas internas ou mensageria externa para desacoplar a geração de tarefas do seu processamento.
@@ -12,7 +12,10 @@ public class ContratosProcessorWorker(Channel<string> canal, ILogger<ContratosPr
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogInformation("[ContratosProcessorWorkerQueue] - Iniciando o processamento da fila de contratos...");
+        logger.LogCritical("====== ContratosProcessorWorker ======");
+        logger.LogInformation("");
+
+        logger.LogInformation("[ContratosProcessorWorker] - Iniciando o processamento da fila de contratos...");
 
         try
         {
@@ -20,11 +23,11 @@ public class ContratosProcessorWorker(Channel<string> canal, ILogger<ContratosPr
             {
                 if (string.IsNullOrWhiteSpace(contrato))
                 {
-                    logger.LogWarning("[ContratosProcessorWorkerQueue] - Contrato vazio ou nulo recebido na fila. Ignorando.");
+                    logger.LogWarning("[ContratosProcessorWorker] - Contrato vazio ou nulo recebido na fila. Ignorando.");
                     continue;
                 }
 
-                logger.LogInformation("[ContratosProcessorWorkerQueue] - Processando contrato com ID: {ContratoId}", contrato);
+                logger.LogInformation("[ContratosProcessorWorker] - Processando contrato com ID: {ContratoId}", contrato);
 
                 // Simula o processamento do contrato
                 await ProcessarContratoAsync(contrato, stoppingToken);
@@ -32,26 +35,26 @@ public class ContratosProcessorWorker(Channel<string> canal, ILogger<ContratosPr
         }
         catch (OperationCanceledException)
         {
-            logger.LogInformation("[ContratosProcessorWorkerQueue] - Cancelamento solicitado. Encerrando o processamento da fila de contratos.");
+            logger.LogInformation("[ContratosProcessorWorker] - Cancelamento solicitado. Encerrando o processamento da fila de contratos.");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "[ContratosProcessorWorkerQueue] - Erro inesperado durante o processamento da fila de contratos.");
+            logger.LogError(ex, "[ContratosProcessorWorker] - Erro inesperado durante o processamento da fila de contratos.");
         }
         finally
         {
-            logger.LogInformation("[ContratosProcessorWorkerQueue] - Processamento da fila de contratos finalizado.");
+            logger.LogInformation("[ContratosProcessorWorker] - Processamento da fila de contratos finalizado.");        
         }
     }
 
     private async Task ProcessarContratoAsync(string contratoId, CancellationToken cancellationToken)
     {
         // Inicia o processamento detalhado do contrato
-        logger.LogInformation("[ContratosProcessorWorkerQueue] - Iniciando o processamento detalhado do contrato: {ContratoId}", contratoId);
+        logger.LogInformation("[ContratosProcessorWorker] - Iniciando o processamento detalhado do contrato: {ContratoId}", contratoId);
 
         // Regras de negócio, integração com banco de dados etc.
         await Task.Delay(500, cancellationToken); // Simulação de processamento
 
-        logger.LogInformation("[ContratosProcessorWorkerQueue] - Finalizado o processamento do contrato: {ContratoId}", contratoId);
+        logger.LogInformation("[ContratosProcessorWorker] - Finalizado o processamento do contrato: {ContratoId}", contratoId);
     }
 }
