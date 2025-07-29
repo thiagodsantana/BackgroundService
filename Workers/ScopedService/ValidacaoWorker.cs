@@ -12,9 +12,9 @@ public class ValidacaoWorker(IServiceProvider serviceProvider, IValidacaoEmprest
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogCritical("====== ValidacaoWorkerScopedService ======");
+        logger.LogCritical("====== ValidacaoWorker ======");
         logger.LogInformation("");
-        logger.LogInformation("[ValidacaoWorkerScopedService] - Iniciando serviço de validação de contratos por escopo.");
+        logger.LogInformation("[ValidacaoWorker] - Iniciando serviço de validação de contratos por escopo.");
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(15));
         try
         {
@@ -26,39 +26,39 @@ public class ValidacaoWorker(IServiceProvider serviceProvider, IValidacaoEmprest
                     string contratoId = string.Empty;
                     contratoId = Guid.NewGuid().ToString();
 
-                    logger.LogInformation("[ValidacaoWorkerSingletonService] - Iniciando validação para o contrato Singleton: {ContratoId}", contratoId);
+                    logger.LogInformation("[ValidacaoWorker] - Iniciando validação para o contrato Singleton: {ContratoId}", contratoId);
 
                     await validacaoEmprestimoSingleton.ValidarAsync(contratoId);
 
-                    logger.LogInformation("[ValidacaoWorkerSingletonService] - Validação concluída para o contrato: {ContratoId}", contratoId);
+                    logger.LogInformation("[ValidacaoWorker] - Validação concluída para o contrato Singleton: {ContratoId}", contratoId);
 
 
                     var validador = escopo.ServiceProvider.GetRequiredService<IValidacaoEmprestimo>();
                     contratoId = Guid.NewGuid().ToString();
 
-                    logger.LogInformation("[ValidacaoWorkerScopedService] - Iniciando validação para o contrato: {ContratoId}", contratoId);
+                    logger.LogInformation("[ValidacaoWorker] - Iniciando validação para o contrato: {ContratoId}", contratoId);
 
                     await validador.ValidarAsync(contratoId);
 
-                    logger.LogInformation("[ValidacaoWorkerScopedService] - Validação concluída para o contrato: {ContratoId}", contratoId);
+                    logger.LogInformation("[ValidacaoWorker] - Validação concluída para o contrato: {ContratoId}", contratoId);
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "[ValidacaoWorkerScopedService] - Erro ao validar contrato dentro do escopo.");
+                    logger.LogError(ex, "[ValidacaoWorker] - Erro ao validar contrato dentro do escopo.");
                 }            
             }
         }
         catch (OperationCanceledException)
         {
-            logger.LogInformation("[ValidacaoWorkerScopedService] - Cancelamento solicitado. Encerrando serviço.");
+            logger.LogInformation("[ValidacaoWorker] - Cancelamento solicitado. Encerrando serviço.");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "[ValidacaoWorkerScopedService] - Erro inesperado no serviço de validação.");
+            logger.LogError(ex, "[ValidacaoWorker] - Erro inesperado no serviço de validação.");
         }
         finally
         {
-            logger.LogInformation("[ValidacaoWorkerScopedService] - Serviço de validação finalizado.");            
+            logger.LogInformation("[ValidacaoWorker] - Serviço de validação finalizado.");            
         }
     }
 }

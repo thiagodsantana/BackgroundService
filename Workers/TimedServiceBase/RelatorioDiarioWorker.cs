@@ -10,10 +10,10 @@ public class RelatorioDiarioWorker(ILogger<RelatorioDiarioWorker> logger) : Back
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        logger.LogCritical("====== RelatorioDiarioWorkerTimedService ======");
+        logger.LogCritical("====== RelatorioDiarioWorker ======");
         logger.LogInformation("");
 
-        logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Serviço iniciado.");
+        logger.LogInformation("[RelatorioDiarioWorker] - Serviço iniciado.");
 
         // Executa imediatamente ao iniciar
         await ExecutarGeracaoRelatorioAsync();
@@ -29,31 +29,31 @@ public class RelatorioDiarioWorker(ILogger<RelatorioDiarioWorker> logger) : Back
         }
         catch (OperationCanceledException)
         {
-            logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Serviço cancelado (Stopping).");
+            logger.LogInformation("[RelatorioDiarioWorker] - Serviço cancelado (Stopping).");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "[RelatorioDiarioWorkerTimedService] - Erro inesperado no loop de execução.");
+            logger.LogError(ex, "[RelatorioDiarioWorker] - Erro inesperado no loop de execução.");
         }
 
-        logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Serviço finalizado.");
+        logger.LogInformation("[RelatorioDiarioWorker] - Serviço finalizado.");
     }
 
     private async Task ExecutarGeracaoRelatorioAsync()
     {
         try
         {
-            logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Iniciando geração do relatório diário...");
+            logger.LogInformation("[RelatorioDiarioWorker] - Iniciando geração do relatório diário...");
 
             // Simula um trabalho assíncrono real
             await Task.Delay(500);
 
             // Aqui vai a lógica real de geração de relatório
-            logger.LogInformation("[RelatorioDiarioWorkerTimedService] - Relatório gerado com sucesso às {Hora}.", DateTime.Now);
+            logger.LogInformation("[RelatorioDiarioWorker] - Relatório gerado com sucesso às {Hora}.", DateTime.Now);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "[RelatorioDiarioWorkerTimedService] - Erro durante a geração do relatório diário.");
+            logger.LogError(ex, "[RelatorioDiarioWorker] - Erro durante a geração do relatório diário.");
         }
     }
 }

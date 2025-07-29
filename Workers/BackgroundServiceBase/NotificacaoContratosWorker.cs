@@ -18,11 +18,11 @@ public class NotificacaoContratosWorker(ILogger<NotificacaoContratosWorker> logg
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                logger.LogInformation("[NotificacaoContratos] - Iniciando envio de notificações de contratos...");
+                logger.LogInformation("[NotificacaoContratosWorker] - Iniciando envio de notificações de contratos...");
 
                 await EnviarNotificacoesAsync(stoppingToken);
 
-                logger.LogInformation("[NotificacaoContratos] - Ciclo de envio de notificações concluído. Aguardando próximo ciclo...");
+                logger.LogInformation("[NotificacaoContratosWorker] - Ciclo de envio de notificações concluído. Aguardando próximo ciclo...");
             }
         }
         catch (OperationCanceledException)
