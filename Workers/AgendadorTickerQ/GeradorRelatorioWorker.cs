@@ -1,12 +1,22 @@
 ﻿using System.Diagnostics;
-using Microsoft.Extensions.Logging;
 using TickerQ.Utilities.Base;
 using TickerQ.Utilities.Enums;
 
 namespace EmprestimosWorkerService.Workers.AgendadorTickerQ;
 
+/*
+    TickerFunction: Esse atributo marca o método que será agendado para execução periódica.
+    Cron expression (* * * * *): Executa a tarefa a cada minuto.
+    TickerTaskPriority:
+        Low: baixa prioridade, pode ser adiada caso o sistema esteja ocupado.
+        Normal: prioridade padrão.
+        High: ideal para tarefas críticas que não devem atrasar.
+    CancellationToken: O TickerQ fornece o token automaticamente para permitir o cancelamento seguro da tarefa.
+ */
+
 public class GeradorRelatorioWorker(ILogger<GeradorRelatorioWorker> logger)
 {
+    // Configurado para executar a cada minuto
     [TickerFunction(functionName: nameof(GerarRelatorio), cronExpression: "* * * * *", TickerTaskPriority.Normal)]
     public async Task GerarRelatorio(CancellationToken token)
     {
