@@ -3,9 +3,11 @@
 namespace EmprestimosWorkerService.Workers.QueueBasedBackgroundService;
 
 /* Queue-based Background Service
-    - Utiliza Channel<T>, filas internas ou mensageria externa para desacoplar a geração de tarefas do seu processamento.
+    - Utiliza Channel<T>, filas internas ou mensageria externa 
+        para desacoplar a geração de tarefas do seu processamento.
 Quando usar?
-    - Para processar tarefas à medida que são enfileiradas, como envio de e-mails, logs ou eventos de domínio.
+    - Para processar tarefas à medida que são enfileiradas, como envio de e-mails, 
+        logs ou eventos de domínio.
  */
 
 public class ContratosProcessorWorker(Channel<string> canal, ILogger<ContratosProcessorWorker> logger) : BackgroundService

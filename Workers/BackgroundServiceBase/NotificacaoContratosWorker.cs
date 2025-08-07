@@ -1,9 +1,10 @@
 ﻿namespace EmprestimosWorkerService.Workers.BackgroundServiceBase;
 
 /*BackgroundService (Base com ExecuteAsync)
-  - Derivado diretamente de BackgroundService
+    - São executados em segundo plano, independentemente do ciclo de vida do aplicativo.  
+    - Derivado diretamente de BackgroundService
 Quando usar?
-  - Para tarefas contínuas ou com polling (checagens regulares).
+    - Para tarefas contínuas ou com polling (checagens regulares).
  */
 
 public class NotificacaoContratosWorker(ILogger<NotificacaoContratosWorker> logger) : BackgroundService

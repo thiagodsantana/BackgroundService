@@ -1,4 +1,4 @@
-using EmprestimosWorkerService;
+Ôªøusing EmprestimosWorkerService;
 using EmprestimosWorkerService.Interfaces;
 using EmprestimosWorkerService.Services;
 using EmprestimosWorkerService.Workers.AgendadorQuartz;
@@ -7,46 +7,59 @@ using EmprestimosWorkerService.Workers.HostedBase;
 using EmprestimosWorkerService.Workers.QueueBasedBackgroundService;
 using EmprestimosWorkerService.Workers.ScopedService;
 using EmprestimosWorkerService.Workers.TimedServiceBase;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Quartz;
 using Serilog;
 using System.Threading.Channels;
+using TickerQ;
+using TickerQ.Dashboard.DependencyInjection;
+using TickerQ.DependencyInjection;
+using TickerQ.DependencyInjection.Hosting;
 
-#region ConfiguraÁ„o do Serilog
-// ConfiguraÁ„o do Serilog antes da criaÁ„o do host
+#region Configura√ß√£o do Serilog
+// Configura√ß√£o do Serilog antes da cria√ß√£o do host
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Debug()
     .Enrich.FromLogContext()
+
+    .WriteTo.Logger(lc => lc
+    .WriteTo.Console()
+    .Filter.ByIncludingOnly(le => le.Properties["SourceContext"]?.ToString().Contains("TickerQ") == true)
+    .WriteTo.File("logs/TickerQ.log", rollingInterval: RollingInterval.Day))
 
     // Log geral
     .WriteTo.Console()
     .WriteTo.File("logs/geral.log", rollingInterval: RollingInterval.Day)
 
-    // Log especÌfico para NotificacaoContratosWorker
+    // Log espec√≠fico para NotificacaoContratosWorker
     .WriteTo.Logger(lc => lc
         .Filter.ByIncludingOnly(le => le.Properties["SourceContext"]?.ToString().Contains("NotificacaoContratosWorker") == true)
         .WriteTo.File("logs/NotificacaoContratosWorker.log", rollingInterval: RollingInterval.Day))
 
-    // Log especÌfico para RelatorioDiarioWorker
+    // Log espec√≠fico para RelatorioDiarioWorker
     .WriteTo.Logger(lc => lc
         .Filter.ByIncludingOnly(le => le.Properties["SourceContext"]?.ToString().Contains("RelatorioDiarioWorker") == true)
         .WriteTo.File("logs/RelatorioDiarioWorker.log", rollingInterval: RollingInterval.Day))
 
-    // Log especÌfico para ContratosProcessorWorker
+    // Log espec√≠fico para ContratosProcessorWorker
     .WriteTo.Logger(lc => lc
         .Filter.ByIncludingOnly(le => le.Properties["SourceContext"]?.ToString().Contains("ContratosProcessorWorker") == true)
         .WriteTo.File("logs/ContratosProcessorWorker.log", rollingInterval: RollingInterval.Day))
 
-    // Log especÌfico para SincronizacaoStatusContratosWorker
+    // Log espec√≠fico para SincronizacaoStatusContratosWorker
     .WriteTo.Logger(lc => lc
         .Filter.ByIncludingOnly(le => le.Properties["SourceContext"]?.ToString().Contains("SincronizacaoStatusContratosWorker") == true)
         .WriteTo.File("logs/SincronizacaoStatusContratosWorker.log", rollingInterval: RollingInterval.Day))
 
-    // Log especÌfico para CustomizadoWorker
+    // Log espec√≠fico para CustomizadoWorker
     .WriteTo.Logger(lc => lc
         .Filter.ByIncludingOnly(le => le.Properties["SourceContext"]?.ToString().Contains("WorkerCustomizadoHosted") == true)
         .WriteTo.File("logs/WorkerCustomizadoHosted.log", rollingInterval: RollingInterval.Day))
 
-    // Log especÌfico para ValidacaoWorker
+    // Log espec√≠fico para ValidacaoWorker
     .WriteTo.Logger(lc => lc
         .Filter.ByIncludingOnly(le => le.Properties["SourceContext"]?.ToString().Contains("ValidacaoWorker") == true)
         .WriteTo.File("logs/ValidacaoWorker.log", rollingInterval: RollingInterval.Day))
@@ -60,60 +73,70 @@ var builder = Host.CreateDefaultBuilder(args)
     .ConfigureServices((context, services) =>
     {
         #region Worker implementado diremente com IHostedService
-        // HostedBase - ServiÁo customizado que implementa diretamente IHostedService, para controle total do ciclo de vida
+        // HostedBase - Servi√ßo customizado que implementa diretamente IHostedService, para controle total do ciclo de vida
         //services.AddHostedService<CustomizadoWorker>();
         #endregion
 
-        #region Worker implementado com BackgroundService (ServiÁo contÌnuo)
-        // BackgroundService - ServiÁo contÌnuo que monitora e envia notificaÁıes relacionadas a contratos
+        #region Worker implementado com BackgroundService (Servi√ßo cont√≠nuo)
+        // BackgroundService - Servi√ßo cont√≠nuo que monitora e envia notifica√ß√µes relacionadas a contratos
         //services.AddHostedService<NotificacaoContratosWorker>();
         #endregion
 
-        #region Worker implementado com TimedServiceBase (ServiÁo baseado em timer)
-        // TimedService - ServiÁo baseado em timer para geraÁ„o periÛdica de relatÛrios di·rios de emprÈstimos
+        #region Worker implementado com TimedServiceBase (Servi√ßo baseado em timer)
+        // TimedService - Servi√ßo baseado em timer para gera√ß√£o peri√≥dica de relat√≥rios di√°rios de empr√©stimos
         //services.AddHostedService<RelatorioDiarioWorker>();
         #endregion
 
-        #region Worker implementado com QueueBase (ServiÁo baseado em fila)
-        // QueueBasedBackgroundService - ServiÁo consumidor respons·vel por processar contratos provenientes da fila (Channel)
-        services.AddHostedService<ContratosProcessorWorker>();
-        
-        //ServiÁo para entrada de comandos via Console
-        services.AddHostedService<ConsoleCommandWorker>();
+        #region Worker implementado com QueueBase (Servi√ßo baseado em fila)
+        // QueueBasedBackgroundService - Servi√ßo consumidor respons√°vel por processar contratos provenientes da fila (Channel)
+        //services.AddHostedService<ContratosProcessorWorker>();
 
-        //CriaÁ„o de uma fila em memÛria(Channel) para comunicaÁ„o assÌncrona e desacoplada entre produtores e consumidores
-        var channel = Channel.CreateUnbounded<string>();
-        services.AddSingleton(channel);
+        //Servi√ßo para entrada de comandos via Console
+        //services.AddHostedService<ConsoleCommandWorker>();
+
+        //Cria√ß√£o de uma fila em mem√≥ria(Channel) para comunica√ß√£o ass√≠ncrona e desacoplada entre produtores e consumidores
+        //var channel = Channel.CreateUnbounded<string>();
+        //services.AddSingleton(channel);
         #endregion
 
-        #region Worker implementado com ScopedService (ServiÁo baseado em escopo)
-        //Registro da implementaÁ„o do serviÁo de validaÁ„o de contratos com tempo de vida Scoped(por requisiÁ„o / escopo)
+        #region Worker implementado com ScopedService (Servi√ßo baseado em escopo)
+        //Registro da implementa√ß√£o do servi√ßo de valida√ß√£o de contratos com tempo de vida Scoped(por requisi√ß√£o / escopo)
         //services.AddScoped<IValidacaoEmprestimo, ValidacaoEmprestimoService>();
         //services.AddSingleton<IValidacaoEmprestimoSingleton, ValidacaoEmprestimoSingletonService>();
 
-        // ScopedService - ServiÁo que consome o serviÁo de validaÁ„o Scoped dentro de um BackgroundService, criando escopos manuais para injeÁ„o
+        // ScopedService - Servi√ßo que consome o servi√ßo de valida√ß√£o Scoped dentro de um BackgroundService, criando escopos manuais para inje√ß√£o
         //services.AddHostedService<ValidacaoWorker>();
         #endregion
 
+        #region Worker implementado com AgendadorTickerQ (TickerQ)
+        services.AddTickerQ(options =>
+        {
+            options.SetMaxConcurrency(1);
+        });
+        #endregion
+
         #region Worker implementado com AgendadorQuartz (Quartz Scheduler)
-        // AgendadorQuartz - ConfiguraÁ„o do Quartz Scheduler para agendamento avanÁado de tarefas
+        // AgendadorQuartz - Configura√ß√£o do Quartz Scheduler para agendamento avan√ßado de tarefas
         //services.AddQuartz(q =>
         //{
         //    var jobKey = new JobKey("SincronizacaoStatusContratosJob");
 
-        //    // Registro do job que executa a lÛgica de sincronizaÁ„o com sistemas externos
+        //    // Registro do job que executa a l√≥gica de sincroniza√ß√£o com sistemas externos
         //    q.AddJob<SincronizacaoStatusContratosWorker>(opt => opt.WithIdentity(jobKey));
 
-        //    // ConfiguraÁ„o do trigger que dispara o job a cada 20 segundos, repetidamente
+        //    // Configura√ß√£o do trigger que dispara o job a cada 20 segundos, repetidamente
         //    q.AddTrigger(opt => opt
         //        .ForJob(jobKey)
         //        .WithSimpleSchedule(x => x.WithIntervalInSeconds(20).RepeatForever()));
         //});
 
-        ////Hospeda o Quartz como um serviÁo gerenciado, aguardando o tÈrmino dos jobs no shutdown
+        ////Hospeda o Quartz como um servi√ßo gerenciado, aguardando o t√©rmino dos jobs no shutdown
         //services.AddQuartzHostedService(opt => opt.WaitForJobsToComplete = true);
         #endregion
 
     }).UseWindowsService();
 
-await builder.Build().RunAsync();
+var app = builder.Build();
+
+app.UseTickerQ();
+await app.RunAsync();

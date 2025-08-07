@@ -2,7 +2,8 @@
 
 /*
  Implementação manual de IHostedService com IAsyncDisposable
- - Controle total sobre start, stop e liberação assíncrona de recursos.
+    - São executados no ciclo de vida de um aplicativo ASP.NET Core.
+    - Controle total sobre start, stop e liberação assíncrona de recursos.
  Quando usar?
  - Serviços que gerenciam conexões ou recursos assíncronos e precisam liberar corretamente.
 */

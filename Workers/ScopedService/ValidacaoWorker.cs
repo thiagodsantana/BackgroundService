@@ -3,7 +3,8 @@
 namespace EmprestimosWorkerService.Workers.ScopedService;
 
 /* Scoped Background Service
-    - Dentro de um BackgroundService, você pode criar escopos manuais para injetar dependências do tipo Scoped (como um DbContext).
+    - Dentro de um BackgroundService, você pode criar escopos manuais 
+        para injetar dependências do tipo Scoped (como um DbContext).
 Quando usar?
     - Quando o seu serviço precisa de uma dependência que não pode ser Singleton.
  */

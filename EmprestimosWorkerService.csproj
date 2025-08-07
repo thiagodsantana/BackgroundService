@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Worker">
+﻿<Project Sdk="Microsoft.NET.Sdk.Worker">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -15,5 +15,8 @@
     <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
     <PackageReference Include="Serilog.Extensions.Logging" Version="9.0.2" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+    <PackageReference Include="TickerQ" Version="2.4.3" />
+    <PackageReference Include="TickerQ.Dashboard" Version="2.4.3" />
+    <PackageReference Include="TickerQ.EntityFrameworkCore" Version="2.4.3" />
   </ItemGroup>
 </Project>
